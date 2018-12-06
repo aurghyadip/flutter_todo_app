@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+
+import 'home_page.dart';
 
 class LoginPage extends StatefulWidget {
   @override
@@ -8,6 +12,22 @@ class LoginPage extends StatefulWidget {
 
 class _LoginPageState extends State<LoginPage>{
   final _loginForm = GlobalKey<FormState>();
+  
+  final FirebaseAuth _fAuth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = new GoogleSignIn();
+
+  Future<FirebaseUser> _handleSignIn() async {
+    GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+    GoogleSignInAuthentication gAuth = await googleUser.authentication;
+
+    FirebaseUser user = await _fAuth.signInWithGoogle(
+      accessToken: gAuth.accessToken,
+      idToken: gAuth.idToken,
+    );
+
+    return user;
+    
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,7 +35,7 @@ class _LoginPageState extends State<LoginPage>{
       body: new Stack(
         children: <Widget>[
           new Container(
-            color: Colors.lime.shade300,
+            color: Colors.lightBlue.shade50,
           ),
           new Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -85,12 +105,33 @@ class _LoginPageState extends State<LoginPage>{
                             }
                           },
                           child: Text(
-                            "SUBMIT",
+                            "Login with Email",
                             style: TextStyle(fontSize: 20.0, color: Colors.white),
                           ),
-                          padding: EdgeInsets.all(15.0),
-                          color: Colors.black,
-                          splashColor: Colors.redAccent,
+                          padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 15.0),
+                          color: Colors.lightBlueAccent.shade700,
+                          splashColor: Colors.black,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0)
+                          ),
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 30.0),
+                        child: FlatButton(
+                          onPressed: () {
+                            _handleSignIn().then((FirebaseUser user)=>print(user)).catchError((e)=>print(e));
+                          },
+                          child: Text(
+                            "Login with Google",
+                            style: TextStyle(fontSize: 19.0, color: Colors.white),
+                          ),
+                          padding: EdgeInsets.symmetric(horizontal: 30.0, vertical: 15.0),
+                          color: Colors.red.shade400,
+                          splashColor: Colors.blue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15.0)
+                          ),
                         ),
                       )
                     ],
